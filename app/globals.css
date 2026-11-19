@@ -1,0 +1,182 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------ */
+/*  Design tokens (§3)                                                 */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --bg: #f4f2ee;
+  --surface: #ece9e4;
+  --ink: #141414;
+  --ink-soft: #3a3a38;
+  /* Darkened from #7A7873 so it passes WCAG AA on both --bg (5.2:1) and --surface (4.8:1) */
+  --muted: #67655f;
+  --line: rgba(20, 20, 20, 0.12);
+  --bg-inverse: #141414;
+  --ink-inverse: #f4f2ee;
+  --muted-inverse: #9c9a95;
+  --line-inverse: rgba(244, 242, 238, 0.16);
+
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --section-y: clamp(6rem, 14vw, 12.5rem);
+  --grid-gap: clamp(0.75rem, 1.5vw, 1.5rem);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-inverse: var(--bg-inverse);
+  --color-ink-inverse: var(--ink-inverse);
+  --color-muted-inverse: var(--muted-inverse);
+  --color-line-inverse: var(--line-inverse);
+
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --radius-tile: 6px;
+  --ease-quint: var(--ease);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Type scale (§3.3)                                                  */
+/* ------------------------------------------------------------------ */
+
+@utility t-display {
+  font-size: clamp(3.5rem, 11vw, 11rem);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+}
+@utility t-statement {
+  font-size: clamp(2.25rem, 8vw, 8.5rem);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 0.92;
+}
+@utility t-h1 {
+  font-size: clamp(2.75rem, 7vw, 6.5rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+@utility t-h2 {
+  font-size: clamp(1.75rem, 3.5vw, 3rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+@utility t-h3 {
+  font-size: clamp(1.25rem, 2vw, 1.625rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+@utility t-body-lg {
+  font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+}
+@utility t-body {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+@utility t-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+@utility t-caption {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Layout utilities (§3.4)                                            */
+/* ------------------------------------------------------------------ */
+
+@utility container-page {
+  width: 100%;
+  max-width: 1680px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+@utility section-y {
+  padding-block: var(--section-y);
+}
+@utility gap-grid {
+  gap: var(--grid-gap);
+}
+@utility bleed-x {
+  margin-inline: calc(var(--gutter) * -1);
+  padding-inline: var(--gutter);
+  scroll-padding-inline: var(--gutter);
+}
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Base                                                               */
+/* ------------------------------------------------------------------ */
+
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background: var(--bg);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  [id] {
+    scroll-margin-top: 80px;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  .on-dark :focus-visible {
+    outline-color: var(--ink-inverse);
+  }
+  button {
+    cursor: pointer;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

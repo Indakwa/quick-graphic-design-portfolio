@@ -56,16 +56,18 @@ export function Hero() {
         </motion.div>
       </div>
 
-      <div className="mt-10 aspect-[4/5] md:mt-16 md:aspect-[16/9]">
-        <MediaSlot
-          media={site.heroMedia}
-          fill
-          priority
-          reveal="hero"
-          delay={afterName - 0.1}
-          sizes="(min-width: 1680px) 1584px, calc(100vw - 2.5rem)"
-        />
-      </div>
+      {site.heroMedia && (
+        <div className="mt-10 aspect-[4/5] md:mt-16 md:aspect-[16/9]">
+          <MediaSlot
+            media={site.heroMedia}
+            fill
+            priority
+            reveal="hero"
+            delay={afterName - 0.1}
+            sizes="(min-width: 1680px) 1584px, calc(100vw - 2.5rem)"
+          />
+        </div>
+      )}
     </section>
   );
 }

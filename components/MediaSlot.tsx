@@ -133,19 +133,35 @@ function MediaContent({
 
   return (
     <div
-      className="@container absolute inset-0 flex flex-col justify-end p-4 sm:p-5"
+      className="@container absolute inset-0 flex flex-col justify-between p-3 sm:p-5"
       style={{ backgroundColor: media.tone, boxShadow: 'inset 0 0 0 1px var(--line)' }}
       role="img"
       aria-label={media.description}
     >
-      <span className="t-label text-ink-soft">{media.video ? ui.videoLabel : ui.imageLabel}</span>
-      {!hideDescription && (
-        <span className="t-caption mt-1.5 hidden max-w-[32ch] text-ink-soft @[11rem]:block">
-          {media.description}
+      <span className="t-label flex justify-between gap-2 text-ink-soft">
+        <span>{media.slot}</span>
+        <span>{media.video ? ui.videoLabel : ui.imageLabel}</span>
+      </span>
+      <span className="block">
+        <span className="tabular block text-[clamp(0.9375rem,7cqw,1.75rem)] font-semibold leading-tight tracking-[-0.02em] text-ink">
+          {media.size[0]} × {media.size[1]} px
         </span>
-      )}
+        <span className="t-caption tabular mt-0.5 block text-ink-soft">
+          W × H · {media.ratio.replace('/', ':')} {orientation(media.ratio)}
+        </span>
+        {!hideDescription && (
+          <span className="t-caption mt-2 hidden max-w-[32ch] text-ink-soft @[16rem]:block">
+            {media.description}
+          </span>
+        )}
+      </span>
     </div>
   );
+}
+
+function orientation(ratio: string) {
+  const [w, h] = ratio.split('/').map(Number);
+  return w === h ? 'square' : w > h ? 'landscape' : 'portrait';
 }
 
 /** Muted looping video that pauses off-screen and under reduced motion. */

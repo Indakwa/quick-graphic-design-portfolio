@@ -33,7 +33,8 @@ export function CursorLabel() {
       return;
     }
     const check = (target: EventTarget | null) => {
-      const el = target instanceof Element ? target.closest('[data-cursor]') : null;
+      const el =
+        target instanceof Element && !target.closest('[role=dialog]') ? target.closest('[data-cursor]') : null;
       const next = el ? el.getAttribute('data-cursor') : null;
       visible.current = next !== null;
       setLabel(next);
@@ -53,10 +54,14 @@ export function CursorLabel() {
       visible.current = false;
       setLabel(null);
     };
+    // A click usually opens the lightbox over the tile, so hide straight away.
+    const onDown = () => onLeave();
+    window.addEventListener('pointerdown', onDown, { passive: true });
     window.addEventListener('pointermove', onMove, { passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
     document.documentElement.addEventListener('pointerleave', onLeave);
     return () => {
+      window.removeEventListener('pointerdown', onDown);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('scroll', onScroll);
       document.documentElement.removeEventListener('pointerleave', onLeave);

@@ -1,37 +1,34 @@
 'use client';
 
 import type { Project } from '@/lib/content';
-import { ui } from '@/lib/content';
-import { Cta } from './Cta';
 import { MediaSlot } from './MediaSlot';
 import { RevealGroup, RevealItem } from './Reveal';
 import { SplitTextReveal } from './SplitTextReveal';
 import { TagList } from './Tag';
-
-type OpenFn = (slug: string, trigger?: HTMLElement | null) => void;
+import { ViewTile, type OnView } from './ViewTile';
 
 /**
  * Inspo 2: a row of 3 images on top, a wide text band below.
  * Mobile: the row becomes a scroll-snap carousel (85% cards, next one peeks).
  */
-export function ProjectStacked({ project, onOpen }: { project: Project; onOpen: OpenFn }) {
+export function ProjectStacked({ project, onView }: { project: Project; onView: OnView }) {
   const headingId = `${project.slug}-title`;
-  const open = (el?: HTMLElement | null) => onOpen(project.slug, el);
+  const tiles = project.cover.slice(0, 3);
 
   return (
     <section aria-labelledby={headingId} className="container-page section-y !pt-0">
-      <div
-        className="bleed-x no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto md:mx-0 md:grid md:grid-cols-3 md:gap-3 md:overflow-visible md:px-0"
-        data-cursor={ui.cursorView}
-      >
-        {project.cover.slice(0, 3).map((m, i) => (
-          <div
+      <div className="bleed-x no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto md:mx-0 md:grid md:grid-cols-3 md:gap-3 md:overflow-visible md:px-0">
+        {tiles.map((m, i) => (
+          <ViewTile
             key={i}
-            className="w-[85%] shrink-0 cursor-pointer snap-start md:w-auto"
-            onClick={() => open(null)}
+            items={tiles}
+            index={i}
+            title={project.title}
+            onView={onView}
+            className="w-[85%] shrink-0 snap-start md:w-auto"
           >
             <MediaSlot media={m} delay={i * 0.08} sizes="(min-width: 768px) 33vw, 85vw" />
-          </div>
+          </ViewTile>
         ))}
       </div>
 
@@ -49,11 +46,8 @@ export function ProjectStacked({ project, onOpen }: { project: Project; onOpen: 
             <RevealItem>
               <p className="t-body-lg max-w-[60ch] text-ink-soft">{project.summary}</p>
             </RevealItem>
-            <RevealItem className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <RevealItem className="mt-8">
               <TagList tags={project.tags} />
-              <Cta slug={project.slug} onClick={open} block className="sm:w-auto">
-                {project.cta}
-              </Cta>
             </RevealItem>
           </div>
         </RevealGroup>

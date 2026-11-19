@@ -33,6 +33,10 @@ export type Media =
       tone: string;
       description: string;
       ratio: string; // e.g. '3/4'
+      /** Recommended export size in px (width × height), shown on the placeholder. */
+      size: [number, number];
+      /** Short code shown on the placeholder so it can be matched to the README table, e.g. 'PMK-A'. */
+      slot?: string;
       /** Shows "VIDEO" instead of "IMAGE" on the placeholder. */
       video?: boolean;
     };
@@ -78,11 +82,31 @@ export const placeholderTones = [
   '#D0C9C0', // stone
 ];
 
+/**
+ * Export size (width × height, px) for each slot shape. Roughly 2× the
+ * largest size the slot is shown at, so images stay sharp on retina screens.
+ */
+const exportSizes: Record<string, [number, number]> = {
+  '16/9': [2400, 1350],
+  '3/2': [1500, 1000],
+  '4/3': [1600, 1200],
+  '1/1': [1200, 1200],
+  '4/5': [1200, 1500],
+  '3/4': [1200, 1600],
+  '2/3': [1200, 1800],
+};
+
+export function exportSize(ratio: string): [number, number] {
+  if (exportSizes[ratio]) return exportSizes[ratio];
+  const [w, h] = ratio.split('/').map(Number);
+  return w >= h ? [1600, Math.round((1600 * h) / w)] : [Math.round((1600 * w) / h), 1600];
+}
+
 let toneIndex = 0;
 /** Placeholder media block. Tones rotate automatically. */
-function ph(ratio: string, description: string, opts: { video?: boolean } = {}): Media {
+function ph(ratio: string, description: string, opts: { video?: boolean; slot?: string } = {}): Media {
   const tone = placeholderTones[toneIndex++ % placeholderTones.length];
-  return { kind: 'placeholder', tone, description, ratio, ...opts };
+  return { kind: 'placeholder', tone, description, ratio, size: exportSize(ratio), ...opts };
 }
 
 /* ------------------------------------------------------------------ */
@@ -118,10 +142,13 @@ export const site = {
     { label: 'WhatsApp', href: 'https://wa.me/[2547XXXXXXXX]' },
     { label: 'CV (PDF)', href: '/cv.pdf' },
   ],
-  heroMedia: ph(
-    '16/9',
-    'Wide hero shot from the PM Kenya event: the roll-up banner in frame, attendees wearing the event tees, warm natural light, real people mid-conversation. Shows poster, merch and banner in a single photo.',
-  ),
+  /**
+   * Big image under the hero text. Set to null to hide it.
+   * To bring it back, replace null with:
+   *   ph('16/9', 'Wide hero shot from the PM Kenya event: the roll-up banner in frame, attendees wearing the event tees, warm natural light, real people mid-conversation.')
+   * or a real { kind: 'image', … } entry (2400 × 1350 px).
+   */
+  heroMedia: null as Media | null,
 };
 
 export const nav = {
@@ -156,6 +183,13 @@ export const ui = {
     next: 'Next project',
     dragHint: 'Drag down to close',
   },
+  lightbox: {
+    label: 'Image viewer',
+    close: 'Close image',
+    prev: 'Previous image',
+    next: 'Next image',
+    open: (desc: string) => `View larger: ${desc}`,
+  },
   copy: 'Copy',
   copied: 'Email copied',
   backToTop: 'Back to top',
@@ -171,7 +205,7 @@ export const projects: Project[] = [
     slug: 'pm-kenya',
     number: '01',
     label: 'Community event',
-    title: 'PM Kenya',
+    title: 'Product Managers Kenya',
     summary:
       'Event identity for Product Managers Kenya: posters, tees and a roll-up banner, all built from one visual system and delivered in a single sprint.',
     tags: ['POSTER', 'MERCH', 'BANNER', 'DIGITAL'],
@@ -188,11 +222,9 @@ export const projects: Project[] = [
     roleDetail:
       'I led the identity end to end: concept, type system, poster series, tee graphics and the roll-up banner, then prepared every file for print and social. [Add who you worked with and anything you’d do differently.]',
     cover: [
-      ph('3/4', 'Main event poster shot straight-on, printed and pinned to a textured wall, or as a clean flat digital render. This is the hero of the project.'),
-      ph('4/3', 'Candid waist-up photo of an attendee wearing the PM Kenya tee at the event, print clearly visible, with the crowd softly blurred behind.'),
-      ph('1/1', 'Roll-up banner standing at the venue entrance with people walking past for scale.'),
-      ph('4/5', 'Phone mockup or in-hand shot showing the Instagram poster or story version of the event artwork.'),
-      ph('16/9', 'Macro close-up of the tee print texture or a poster type detail, showing craft and finish.'),
+      ph('2/3', 'Main event poster shot straight-on, printed and pinned to a textured wall, or as a clean flat digital render. This is the hero of the project.', { slot: 'PMK-A' }),
+      ph('1/1', 'Candid photo of an attendee wearing the PM Kenya tee at the event, print clearly visible, with the crowd softly blurred behind.', { slot: 'PMK-B' }),
+      ph('1/1', 'Roll-up banner standing at the venue entrance with people walking past for scale.', { slot: 'PMK-C' }),
     ],
     gallery: [
       ph('16/9', 'The full system laid out flat: poster, tee, banner and social tiles side by side, so the shared visual language is obvious at a glance.'),
@@ -228,9 +260,9 @@ export const projects: Project[] = [
     roleDetail:
       'Everything: taking briefs over WhatsApp, designing, sourcing blanks, working with the printer, pricing, delivery and the Instagram page. [Add a line about the best-selling design or a favourite client story.]',
     cover: [
-      ph('4/5', 'A customer wearing a Bigfoot custom tee outdoors in Nairobi, street setting, natural light, full or three-quarter body.'),
-      ph('4/5', 'Flat-lay of 4–6 different custom tees on a neutral surface, shot from above, showing range.'),
-      ph('4/5', 'Close-up of print texture, a neck label or a Bigfoot tag on folded tees.'),
+      ph('4/5', 'A customer wearing a Bigfoot custom tee outdoors in Nairobi, street setting, natural light, full or three-quarter body.', { slot: 'BIG-1' }),
+      ph('4/5', 'Flat-lay of 4–6 different custom tees on a neutral surface, shot from above, showing range.', { slot: 'BIG-2' }),
+      ph('4/5', 'Close-up of print texture, a neck label or a Bigfoot tag on folded tees.', { slot: 'BIG-3' }),
     ],
     gallery: [
       ph('16/9', 'A group of customers wearing their custom tees together: a team, a friend group or a family event.'),
@@ -251,9 +283,9 @@ export const projects: Project[] = [
     slug: 'nobody-asked',
     number: '03',
     label: 'Nobody asked',
-    title: 'Swahili, for fun.',
+    title: 'Karibu Kenya',
     summary:
-      'A self-initiated series of typographic posters built around everyday Swahili and Sheng phrases. No client, no brief, just me playing with words I grew up with.',
+      'A self-initiated series of relatable, everyday Kenyan phrases with bold cartoon illustrations.',
     meta: 'Personal series · 2024–2025 · [N] posters',
     tags: ['POSTER', 'CONCEPT'],
     year: '2024–2025',
@@ -266,10 +298,10 @@ export const projects: Project[] = [
     roleDetail:
       'A weekend habit: pick a phrase, set it, push it until it feels like it belongs on a wall. [Add your favourite phrase and what it means.]',
     cover: [
-      ph('3/4', 'Bold black-and-white type poster, one phrase set large, high contrast.'),
-      ph('3/4', 'A colourful poster from the series, showing the most playful one.'),
-      ph('3/4', 'A poster with hand-lettered or experimental type.'),
-      ph('3/4', 'The poster you’re proudest of, ideally shot printed on a wall or held up.'),
+      ph('3/4', 'Karibu Kenya poster 1.', { slot: 'KK-1' }),
+      ph('3/4', 'Karibu Kenya poster 2: the most playful one.', { slot: 'KK-2' }),
+      ph('3/4', 'Karibu Kenya poster 3.', { slot: 'KK-3' }),
+      ph('3/4', 'The poster you’re proudest of, ideally shot printed on a wall or held up.', { slot: 'KK-4' }),
     ],
     gallery: [
       ph('16/9', 'The whole series pinned up together on one wall, shot straight-on.'),
@@ -296,14 +328,14 @@ export const experiments = {
   title: 'Experiments',
   body: 'Quick tests, side collections and new tools I’m playing with: motion, AI-assisted roughs, illustration and type studies.',
   tiles: [
-    { caption: 'Launch poster for [Product], version A of the matching pair.', media: ph('1/1', 'Launch poster for [Product], version A of the matching pair.') },
-    { caption: 'Launch poster for [Product], version B.', media: ph('1/1', 'Launch poster for [Product], version B.') },
-    { caption: 'Animated poster loop — motion test.', media: ph('1/1', 'Animated poster loop (muted autoplay MP4) — motion test.', { video: true }) },
-    { caption: 'Illustration piece from a personal collection.', media: ph('1/1', 'Illustration piece from a personal collection.') },
-    { caption: 'AI-assisted rough next to the hand-finished final.', media: ph('1/1', 'AI-assisted rough next to the hand-finished final, side by side.') },
-    { caption: 'Type study / custom lettering.', media: ph('1/1', 'Type study or custom lettering.') },
-    { caption: 'Character / sticker illustration.', media: ph('1/1', 'Character or sticker illustration.') },
-    { caption: 'Matchday-style sports poster concept.', media: ph('1/1', 'Matchday-style sports poster concept, which bridges toward the sports brand.') },
+    { caption: 'Launch poster for [Product], version A of the matching pair.', media: ph('1/1', 'Launch poster for [Product], version A of the matching pair.', { slot: 'EXP-1' }) },
+    { caption: 'Launch poster for [Product], version B.', media: ph('1/1', 'Launch poster for [Product], version B.', { slot: 'EXP-2' }) },
+    { caption: 'Animated poster loop — motion test.', media: ph('1/1', 'Animated poster loop (muted autoplay MP4) — motion test.', { video: true, slot: 'EXP-3' }) },
+    { caption: 'Illustration piece from a personal collection.', media: ph('1/1', 'Illustration piece from a personal collection.', { slot: 'EXP-4' }) },
+    { caption: 'AI-assisted rough next to the hand-finished final.', media: ph('1/1', 'AI-assisted rough next to the hand-finished final, side by side.', { slot: 'EXP-5' }) },
+    { caption: 'Type study / custom lettering.', media: ph('1/1', 'Type study or custom lettering.', { slot: 'EXP-6' }) },
+    { caption: 'Character / sticker illustration.', media: ph('1/1', 'Character or sticker illustration.', { slot: 'EXP-7' }) },
+    { caption: 'Matchday-style sports poster concept.', media: ph('1/1', 'Matchday-style sports poster concept, which bridges toward the sports brand.', { slot: 'EXP-8' }) },
   ],
 };
 

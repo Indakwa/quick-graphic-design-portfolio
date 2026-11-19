@@ -1,57 +1,64 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
-import { projects } from '@/lib/content';
-import { useHashModal } from '@/lib/useHashModal';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { Media } from '@/lib/content';
+import { projects, ui } from '@/lib/content';
 import { Contact } from './Contact';
 import { CursorLabel } from './CursorLabel';
 import { ExperimentsGrid } from './ExperimentsGrid';
 import { Footer } from './Footer';
 import { Hero } from './Hero';
+import { Lightbox, type LightboxState } from './Lightbox';
 import { Nav } from './Nav';
 import { NobodyAsked } from './NobodyAsked';
-import { ProjectModal } from './ProjectModal';
 import { ProjectSplit } from './ProjectSplit';
 import { ProjectStacked } from './ProjectStacked';
 import { WhyMe } from './WhyMe';
-import { ui } from '@/lib/content';
 
-const slugs = projects.map((p) => p.slug);
 const bySlug = (s: string) => projects.find((p) => p.slug === s)!;
 
-/** First visible CTA for a project (there can be a mobile and a desktop copy). */
-function visibleCta(slug: string) {
-  return (
-    Array.from(document.querySelectorAll<HTMLElement>(`[data-cta="${slug}"]`)).find(
-      (el) => el.offsetParent !== null,
-    ) ?? null
-  );
+/**
+ * Lightbox state, synced with history so the browser / phone back button
+ * closes it instead of leaving the page.
+ */
+function useLightbox() {
+  const [state, setState] = useState<LightboxState>(null);
+  const trigger = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const onPop = () => setState(null);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  // Return focus to the image that was clicked.
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (state) wasOpen.current = true;
+    else if (wasOpen.current) {
+      wasOpen.current = false;
+      trigger.current?.focus({ preventScroll: true });
+    }
+  }, [state]);
+
+  const open = useCallback((items: Media[], index: number, title: string, el: HTMLElement) => {
+    trigger.current = el;
+    window.history.pushState({ lightbox: true }, '');
+    setState({ items, index, title });
+  }, []);
+
+  const close = useCallback(() => {
+    if ((window.history.state as { lightbox?: boolean } | null)?.lightbox) window.history.back();
+    else setState(null);
+  }, []);
+
+  const setIndex = useCallback((index: number) => setState((s) => (s ? { ...s, index } : s)), []);
+
+  return { state, open, close, setIndex };
 }
 
 export function Portfolio() {
-  const { slug, open, close } = useHashModal(slugs);
-  const returnFocus = useRef<HTMLElement | null>(null);
-  const wasOpen = useRef(false);
-
-  const handleOpen = useCallback(
-    (s: string, trigger?: HTMLElement | null) => {
-      returnFocus.current = trigger ?? visibleCta(s);
-      open(s);
-    },
-    [open],
-  );
-
-  // Return focus to whatever opened the modal (or the project's CTA after a deep link).
-  useEffect(() => {
-    if (slug) {
-      if (!wasOpen.current && !returnFocus.current) returnFocus.current = visibleCta(slug);
-      wasOpen.current = true;
-    } else if (wasOpen.current) {
-      wasOpen.current = false;
-      returnFocus.current?.focus({ preventScroll: true });
-      returnFocus.current = null;
-    }
-  }, [slug]);
+  const lightbox = useLightbox();
 
   return (
     <>
@@ -65,16 +72,16 @@ export function Portfolio() {
       <main id="main">
         <Hero />
         <div id="work" data-nav="work">
-          <ProjectSplit project={bySlug('pm-kenya')} onOpen={handleOpen} />
-          <ProjectStacked project={bySlug('bigfoot-tees')} onOpen={handleOpen} />
+          <ProjectSplit project={bySlug('pm-kenya')} onView={lightbox.open} />
+          <ProjectStacked project={bySlug('bigfoot-tees')} onView={lightbox.open} />
         </div>
-        <NobodyAsked project={bySlug('nobody-asked')} onOpen={handleOpen} />
-        <ExperimentsGrid />
+        <NobodyAsked project={bySlug('nobody-asked')} onView={lightbox.open} />
+        <ExperimentsGrid onView={lightbox.open} />
         <WhyMe />
         <Contact />
       </main>
       <Footer />
-      <ProjectModal slug={slug} onClose={close} onNavigate={open} />
+      <Lightbox state={lightbox.state} onClose={lightbox.close} onIndex={lightbox.setIndex} />
       <CursorLabel />
     </>
   );

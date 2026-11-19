@@ -1,35 +1,29 @@
 'use client';
 
 import type { Project } from '@/lib/content';
-import { ui } from '@/lib/content';
-import { Cta } from './Cta';
 import { MediaSlot } from './MediaSlot';
 import { RevealGroup, RevealItem } from './Reveal';
 import { SplitTextReveal } from './SplitTextReveal';
 import { TagList } from './Tag';
-
-type OpenFn = (slug: string, trigger?: HTMLElement | null) => void;
+import { ViewTile, type OnView } from './ViewTile';
 
 /**
- * Inspo 1: text panel (cols 1–5) + bento mosaic of 5 tiles (cols 6–12).
- * Mobile: text first, 2-col mosaic (A spans two rows), full-width CTA below.
+ * Inspo 1: text panel (cols 1–5) + bento mosaic of 3 tiles (cols 6–12).
+ *
+ * The mosaic has a fixed 7:6 shape split into columns of 4fr / 3fr and two rows,
+ * on every screen size, so each tile always has the same shape and nothing is cropped:
+ *   A (left, full height)  = 2:3 portrait
+ *   B, C (right, stacked)  = 1:1 square
  */
 const tilePlacement = [
-  // A — tall
-  'row-span-2 lg:col-start-1 lg:row-start-1 lg:row-span-4',
-  // B
-  'lg:col-start-1 lg:row-start-5 lg:row-span-2',
-  // C
-  'lg:col-start-2 lg:row-start-1 lg:row-span-2',
-  // D
-  'lg:col-start-2 lg:row-start-3 lg:row-span-2',
-  // E
-  'lg:col-start-2 lg:row-start-5 lg:row-span-2',
+  'col-start-1 row-start-1 row-span-2', // A
+  'col-start-2 row-start-1', // B
+  'col-start-2 row-start-2', // C
 ];
 
-export function ProjectSplit({ project, onOpen }: { project: Project; onOpen: OpenFn }) {
+export function ProjectSplit({ project, onView }: { project: Project; onView: OnView }) {
   const headingId = `${project.slug}-title`;
-  const open = (el?: HTMLElement | null) => onOpen(project.slug, el);
+  const tiles = project.cover.slice(0, 3);
 
   return (
     <section aria-labelledby={headingId} className="container-page section-y">
@@ -43,7 +37,12 @@ export function ProjectSplit({ project, onOpen }: { project: Project; onOpen: Op
                   {project.number} — {project.label}
                 </p>
               </RevealItem>
-              <SplitTextReveal as="h2" id={headingId} lines={[project.title]} className="t-h1 mt-6" />
+              <SplitTextReveal
+                as="h2"
+                id={headingId}
+                lines={[project.title]}
+                className="t-h1 mt-6 !text-[clamp(2.5rem,5vw,5rem)]"
+              />
             </div>
             <div>
               <RevealItem>
@@ -52,36 +51,24 @@ export function ProjectSplit({ project, onOpen }: { project: Project; onOpen: Op
               <RevealItem>
                 <TagList tags={project.tags} className="mt-6" />
               </RevealItem>
-              <RevealItem className="mt-8 hidden lg:block">
-                <Cta slug={project.slug} onClick={open} block>
-                  {project.cta}
-                </Cta>
-              </RevealItem>
             </div>
           </RevealGroup>
         </div>
 
         {/* Bento mosaic */}
-        <div
-          className="grid auto-rows-[clamp(9rem,40vw,20rem)] grid-cols-2 gap-2 md:gap-3 lg:col-span-7 lg:min-h-[clamp(34rem,48vw,52rem)] lg:auto-rows-auto lg:grid-cols-[1.1fr_1fr] lg:grid-rows-6"
-          data-cursor={ui.cursorView}
-        >
-          {project.cover.slice(0, 5).map((m, i) => (
-            <div key={i} className={`relative cursor-pointer ${tilePlacement[i]}`} onClick={() => open(null)}>
-              <MediaSlot
-                media={m}
-                fill
-                delay={i * 0.08}
-                sizes="(min-width: 1024px) 30vw, 50vw"
-              />
-            </div>
+        <div className="grid aspect-[7/6] grid-cols-[4fr_3fr] grid-rows-2 gap-2 md:gap-3 lg:col-span-7">
+          {tiles.map((m, i) => (
+            <ViewTile
+              key={i}
+              items={tiles}
+              index={i}
+              title={project.title}
+              onView={onView}
+              className={`relative h-full ${tilePlacement[i]}`}
+            >
+              <MediaSlot media={m} fill delay={i * 0.08} sizes="(min-width: 1024px) 30vw, 50vw" />
+            </ViewTile>
           ))}
-        </div>
-
-        <div className="lg:hidden">
-          <Cta slug={project.slug} onClick={open} block>
-            {project.cta}
-          </Cta>
         </div>
       </div>
     </section>

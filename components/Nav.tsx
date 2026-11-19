@@ -56,7 +56,7 @@ export function Nav() {
         >
           <nav aria-label="Primary" className="container-page flex h-16 items-center justify-between">
             <a href="#top" className="text-base font-semibold tracking-[-0.01em]">
-              {site.name}
+              {site.wordmark}
             </a>
 
             <div className="hidden items-center gap-8 md:flex">

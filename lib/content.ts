@@ -90,21 +90,23 @@ function ph(ratio: string, description: string, opts: { video?: boolean } = {}):
 /* ------------------------------------------------------------------ */
 
 export const site = {
-  name: '[Your Name]',
+  name: 'Indakwa Benedict',
+  /** Short name shown top-left in the nav. */
+  wordmark: 'Indakwa',
   /** Hero name, one entry per line. */
-  nameLines: ['Your Name', 'Here.'],
-  initials: 'YN',
-  role: 'Graphic Designer',
+  nameLines: ['Indakwa', 'Benedict.'],
+  initials: 'IB',
+  role: 'Creative Designer',
   location: 'Nairobi, Kenya',
   city: 'Nairobi',
-  heroLabel: 'Graphic Designer — Nairobi, Kenya',
-  intro:
-    'I design posters, merch, banners and screens that people actually want to wear, share and show up for.',
+  heroLabel: 'Creative Designer — Nairobi, Kenya',
+  intro: 'I believe good design takes something complicated and makes it look easy.',
   disciplines: ['Posters', 'Merch', 'Event', 'Digital'],
   email: 'hello@yourname.com',
   /** Used for metadata, OG tags and the sitemap. */
   url: 'https://yourname.com',
-  available: true,
+  /** Shows the "● Available · Nairobi" pill in the nav and mobile menu. */
+  available: false,
   availableLabel: 'Available',
   timeZone: 'Africa/Nairobi',
   timeZoneLabel: 'EAT',

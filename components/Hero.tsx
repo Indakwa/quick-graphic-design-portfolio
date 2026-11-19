@@ -41,10 +41,9 @@ export function Hero() {
         </motion.p>
 
         <motion.div
-          className="flex items-center justify-between gap-6 md:col-span-5 md:justify-end md:gap-10"
+          className="flex items-center md:col-span-5 md:justify-end"
           {...fadeUp(afterName + 0.16)}
         >
-          <p className="t-label text-muted">{site.disciplines.join(' · ')}</p>
           <a href="#work" className="t-label group/scroll inline-flex min-h-11 items-center gap-2 text-ink">
             <span
               aria-hidden
